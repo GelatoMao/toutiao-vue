@@ -21,8 +21,6 @@ export const login = data => {
 
 // 获取用户信息
 export const getUserProfile = () => {
-  // const user = JSON.parse(window.localStorage.getItem('user'))
-
   return request({
     method: 'GET',
     url: '/mp/v1_0/user/profile'

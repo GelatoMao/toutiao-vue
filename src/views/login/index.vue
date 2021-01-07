@@ -55,8 +55,8 @@ export default {
   data () {
     return {
       user: {
-        mobile: '', // 手机号
-        code: '', // 密码
+        mobile: '13911111111', // 手机号
+        code: '246810', // 密码
         agree: false // 是否同意协议
       },
       loginLoading: false, // 登录的loading状态
@@ -121,7 +121,6 @@ export default {
       // 验证通过 提交登录
       login(this.user)
         .then(res => {
-          console.log(res)
           // 使用了message消息组件 登录成功提示
           this.$message({
             message: '登陆成功',
@@ -129,6 +128,17 @@ export default {
           })
           // 登录成功 关闭loading
           this.loginLoading = false
+
+          // 将接口返回的用户相关数据放到本地存储，方便应用数据共享
+          // 本地存储只能存储字符串 如果要存储数组 对象类型的数据，则把他们转化为JSON格式字符串进行存储
+          window.localStorage.setItem('user', JSON.stringify(res.data.data))
+
+          // 跳转到首页
+          // this.$router.push("/");
+          // 这种跳转首页的方法必须要在路由中添加name属性
+          this.$router.push({
+            name: 'home'
+          })
         })
         .catch(err => {
           console.log(err)
