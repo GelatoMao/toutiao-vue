@@ -12,13 +12,17 @@
       <!-- 数据筛选表单 -->
       <el-form ref="form" :model="form" label-width="40px" size="mini">
         <el-form-item label="状态">
-          <el-radio-group v-model="form.resource">
-            <el-radio label="全部"></el-radio>
-            <el-radio label="草稿"></el-radio>
-            <el-radio label="待审核"></el-radio>
-            <el-radio label="审核通过"></el-radio>
-            <el-radio label="审核失败"></el-radio>
-            <el-radio label="已删除"></el-radio>
+          <!-- 将单选框中的数据绑定到status中 -->
+          <el-radio-group v-model="status">
+            <!--
+              el-radio 默认把 label 作为文本和选中之后的 value 值
+          -->
+            <el-radio :label="null">全部</el-radio>
+            <el-radio :label="0">草稿</el-radio>
+            <el-radio :label="1">待审核</el-radio>
+            <el-radio :label="2">审核通过</el-radio>
+            <el-radio :label="3">审核失败</el-radio>
+            <el-radio :label="4">已删除</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="频道">
@@ -38,14 +42,18 @@
           </el-date-picker>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="onSubmit">查询</el-button>
+          <!--
+            button 按钮的 click 事件有个默认参数
+            当你没有指定参数的时候，它会默认传递一个没用的数据
+          -->
+          <el-button type="primary" @click="loadArticles(1)">查询</el-button>
         </el-form-item>
       </el-form>
     </el-card>
 
     <el-card class="box-card">
       <div slot="header" class="clearfix">
-        根据筛选条件共查询到条结果：
+        根据筛选条件共查询到{{ totalCount }}条结果：
       </div>
 
       <!-- 数据列表 -->
@@ -154,28 +162,6 @@ export default {
         resource: '',
         desc: ''
       },
-      tableData: [
-        {
-          date: '2016-05-02',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄'
-        },
-        {
-          date: '2016-05-04',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1517 弄'
-        },
-        {
-          date: '2016-05-01',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1519 弄'
-        },
-        {
-          date: '2016-05-03',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1516 弄'
-        }
-      ],
       articles: [], // 文章数据列表
       articleStatus: [
         { status: 0, text: '草稿', type: 'info' },
@@ -185,7 +171,8 @@ export default {
         { status: 4, text: '已删除', type: 'danger' }
       ],
       totalCount: 0, // 总数据条数
-      pageSize: 20 // 每页大小
+      pageSize: 10, // 每页大小
+      status: null // 查询文章的状态，不传就是全部
     }
   },
   computed: {},
@@ -197,20 +184,19 @@ export default {
   mounted () {},
   methods: {
     loadArticles (page = 1) {
-      getArticles({ page, per_page: this.pageSize }).then(res => {
-        // eslint中需要驼峰命名法 将total_count重新命名
-        const { results, total_count: totalCount } = res.data.data
-        this.articles = results
-        this.totalCount = totalCount
-      })
+      getArticles({ page, per_page: this.pageSize, status: this.status }).then(
+        res => {
+          // eslint中需要驼峰命名法 将total_count重新命名
+          const { results, total_count: totalCount } = res.data.data
+          this.articles = results
+          this.totalCount = totalCount
+        }
+      )
     },
     // 页码改变就会触发这个函数，并且将此时的页码作为参数传递过来
     // 与此同时 调用loadArticles这个函数渲染最新请求数据 并且将当前的页码传递过去
     onCurrentChange (page) {
       this.loadArticles(page)
-    },
-    onSubmit () {
-      console.log('submit')
     }
   }
 }
