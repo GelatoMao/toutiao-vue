@@ -67,7 +67,22 @@
         style="width: 100%"
         size="mini"
       >
-        <el-table-column prop="date" label="封面"> 
+        <el-table-column prop="date" label="封面">
+          <template slot-scope="scope">
+            <!-- 如果有第一张照片，就选第一张，如果没有，就选no-cover.gif -->
+            <img
+              v-if="scope.row.cover.images[0]"
+              class="article-cover"
+              :src="scope.row.cover.images[0]"
+              alt=""
+            />
+            <img v-else class="article-cover" src="./no-cover.gif" alt="" />
+            <!-- <img
+              class="article-cover"
+              :src="scope.row.cover.images[0] || 'no-cover.gif'"
+              alt=""
+            /> -->
+          </template>
         </el-table-column>
         <el-table-column prop="title" label="标题"> </el-table-column>
         <el-table-column label="状态">
@@ -110,77 +125,95 @@
       </el-table>
 
       <!-- 列表分页 默认每页10条数据 一共100页-->
-      <el-pagination background layout="prev, pager, next" :total="1000">
-      </el-pagination>
+      <el-pagination
+        background
+        layout="prev, pager, next"
+        :total="totalCount"
+        @current-change="onCurrentChange"
+        :page-size="pageSize"
+      />
     </el-card>
   </div>
 </template>
 
 <script>
-import { getArticles } from "@/api/article";
+import { getArticles } from '@/api/article'
 export default {
-  name: "ArticleIndex",
+  name: 'ArticleIndex',
   components: {},
   props: {},
-  data() {
+  data () {
     return {
       form: {
-        name: "",
-        region: "",
-        date1: "",
-        date2: "",
+        name: '',
+        region: '',
+        date1: '',
+        date2: '',
         delivery: false,
         type: [],
-        resource: "",
-        desc: ""
+        resource: '',
+        desc: ''
       },
       tableData: [
         {
-          date: "2016-05-02",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
+          date: '2016-05-02',
+          name: '王小虎',
+          address: '上海市普陀区金沙江路 1518 弄'
         },
         {
-          date: "2016-05-04",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1517 弄"
+          date: '2016-05-04',
+          name: '王小虎',
+          address: '上海市普陀区金沙江路 1517 弄'
         },
         {
-          date: "2016-05-01",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1519 弄"
+          date: '2016-05-01',
+          name: '王小虎',
+          address: '上海市普陀区金沙江路 1519 弄'
         },
         {
-          date: "2016-05-03",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1516 弄"
+          date: '2016-05-03',
+          name: '王小虎',
+          address: '上海市普陀区金沙江路 1516 弄'
         }
       ],
-      articles: [], //文章数据列表
+      articles: [], // 文章数据列表
       articleStatus: [
-        { status: 0, text: "草稿", type: "info" },
-        { status: 1, text: "待审核", type: "" },
-        { status: 2, text: "审核通过", type: "success" },
-        { status: 3, text: "审核失败", type: "warning" },
-        { status: 4, text: "已删除", type: "danger" }
-      ]
-    };
+        { status: 0, text: '草稿', type: 'info' },
+        { status: 1, text: '待审核', type: '' },
+        { status: 2, text: '审核通过', type: 'success' },
+        { status: 3, text: '审核失败', type: 'warning' },
+        { status: 4, text: '已删除', type: 'danger' }
+      ],
+      totalCount: 0, // 总数据条数
+      pageSize: 20 // 每页大小
+    }
   },
   computed: {},
   watch: {},
-  created() {
-    this.loadArticles();
+  created () {
+    // 初始状态获取第一页数据
+    this.loadArticles(1)
   },
-  mounted() {},
+  mounted () {},
   methods: {
-    onSubmit() {
-      console.log("submit!");
+    loadArticles (page = 1) {
+      getArticles({ page, per_page: this.pageSize }).then(res => {
+        // eslint中需要驼峰命名法 将total_count重新命名
+        const { results, total_count: totalCount } = res.data.data
+        this.articles = results
+        this.totalCount = totalCount
+      })
     },
-    loadArticles() {
-      getArticles().then(res => (this.articles = res.data.data.results));
+    // 页码改变就会触发这个函数，并且将此时的页码作为参数传递过来
+    // 与此同时 调用loadArticles这个函数渲染最新请求数据 并且将当前的页码传递过去
+    onCurrentChange (page) {
+      this.loadArticles(page)
+    },
+    onSubmit () {
+      console.log('submit')
     }
   }
-};
+}
 </script>
 
 <style scoped lang="less">
@@ -189,5 +222,9 @@ export default {
 }
 .list-table {
   margin-bottom: 20px;
+}
+.article-cover {
+  width: 80px;
+  background-size: cover;
 }
 </style>
