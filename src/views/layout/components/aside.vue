@@ -1,6 +1,7 @@
 <template>
   <!--
     el-menu-item 的 index 不能重复，确保唯一即可 因为激活了路由 所以这边的index设置为路径
+    router开启路由导航模式
   -->
   <el-menu
     class="navmenu-container"
@@ -8,7 +9,7 @@
     background-color="#002033"
     text-color="#fff"
     active-text-color="#ffd04b"
-    router
+    router 
     :collapse="isCollapse"
   >
     <el-menu-item index="/">
